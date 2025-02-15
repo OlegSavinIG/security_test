@@ -2,60 +2,56 @@ package com.example.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.function.Function;
 
 @Component
-//@RequiredArgsConstructor
-//@AllArgsConstructor
+@Slf4j
 public class JWTUtils {
 
     // Ключ шифрования для JWT
-//    @Autowired
     private final SecretKey secretKey;
 
     // Время действия токена в миллисекундах (24 часа)
     private static final long EXPIRATION_TIME = 86400000;
     private static final long REFRESHED_EXPIRATION_TIME = 604800000;
 
-    public JWTUtils(){
+    public JWTUtils() {
         // Строка, используемая для создания секретного ключа
         String secreteString = "MySuperSecretKeyForJWT1234567891234567";//
         byte[] keyBytes = secreteString.getBytes(StandardCharsets.UTF_8);
         secretKey = Keys.hmacShaKeyFor(keyBytes);//
     }
+
     /*Метод для генерации JWT токена на основе данных пользователя*/
-    public String generateToken(UserDetails userDetails){
+    public String generateToken(UserDetails userDetails) {
+        log.info("Generating token for user {}", userDetails.getUsername());
         return Jwts.builder()
                 .issuer("Oleg")
                 .subject(userDetails.getUsername())
+                .claim("roles", userDetails.getAuthorities())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
     }
 
     // Метод для генерации токена обновления (refresh token) с дополнительными данными
-    public String generateRefreshToken(HashMap<String, Object> claims, UserDetails userDetails){
+    public String generateRefreshToken(HashMap<String, Object> claims, UserDetails userDetails) {
         return Jwts.builder()
                 .claims(claims)
                 .issuer("Oleg")
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+REFRESHED_EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + REFRESHED_EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
     }
@@ -82,8 +78,8 @@ public class JWTUtils {
     }
 
 
-        private boolean isTokenExpired(String token) {
-            return extractClaims(token, Claims::getExpiration).before(new Date());
-        }
+    private boolean isTokenExpired(String token) {
+        return extractClaims(token, Claims::getExpiration).before(new Date());
     }
+}
 

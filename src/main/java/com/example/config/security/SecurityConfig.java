@@ -1,8 +1,8 @@
 package com.example.config.security;
 
 import com.example.service.OurUserDetailedService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +19,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
-//@AllArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -31,20 +31,26 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final LoggingFilter loggingFilter;
+    private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-       return httpSecurity.csrf(AbstractHttpConfigurer::disable)
+        return httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login**").permitAll()
+                        .requestMatchers("/login/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sessions -> sessions
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .formLogin(form -> form
+//                        .successHandler(authenticationSuccessHandler)
+//                        .failureHandler(authenticationFailureHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(loggingFilter, JwtAuthenticationFilter.class)
 //                .requiresChannel(channel -> channel
 //                        .anyRequest().requiresSecure())
-               .build();
+
+                .build();
     }
 
 

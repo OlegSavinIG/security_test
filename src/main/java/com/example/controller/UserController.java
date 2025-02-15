@@ -20,14 +20,12 @@ public class UserController {
         return ResponseEntity.ok("Профиль пользователя");
     }
 
-    // Доступно модераторам и выше
     @PostMapping("/moderate")
-    @PreAuthorize("hasRole('MODERATOR')")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     public ResponseEntity<String> moderateContent() {
         return ResponseEntity.ok("Контент проверен");
     }
 
-    // Доступно только SUPER_ADMIN
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {

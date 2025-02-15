@@ -21,11 +21,19 @@ public class LoggingFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         String method = request.getMethod();
         String url = request.getRequestURL().toString();
-        log.info("Method - " + method);
-        log.info("URL - " + url);
+
+        log.info("Method - {}", method);
+        log.info("URL - {}", url);
         filterChain.doFilter(request, response);
 
         int status = response.getStatus();
-        log.info("Response status - " + status);
+        log.info("Response status - {}", status);
+        if (url.endsWith("/login") && "POST".equalsIgnoreCase(method)) {
+            if (status == 200) {
+                log.info("Login successful");
+            } else if (status == 401) {
+                log.warn("Login failed");
+            }
+        }
     }
 }
