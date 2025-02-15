@@ -33,11 +33,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
 
         // Шаг 2: Проверка наличия заголовка авторизации
-        if (authorizationHeader == null) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
-        }
-        // Шаг 3: Извлечение токена из заголовка
+        }        // Шаг 3: Извлечение токена из заголовка
         String jwtToken = authorizationHeader.substring(7);
         // Шаг 4: Извлечение имени пользователя из JWT токена
         String username = jwtUtils.extractUsername(jwtToken);

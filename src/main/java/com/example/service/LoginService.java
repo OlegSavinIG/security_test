@@ -14,7 +14,7 @@ public class LoginService {
     public void increaseFailsCounter(String username){
         User user = repository.findByUsername(username).orElseThrow(
                 () -> new UsernameNotFoundException("User not found"));
-        user.setFailsCounter(user.getFailsCounter()+1);
+        user.setFailsCounter(user.getFailsCounter() + 1);
         if (user.getFailsCounter() >= MAX_FAILED_ATTEMPTS) {
             user.setAccountLocker(false);
         }

@@ -31,8 +31,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final LoggingFilter loggingFilter;
-    private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
-    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
+    private final LoginAttemptFilter loginAttemptFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -42,14 +41,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(sessions -> sessions
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .formLogin(form -> form
-//                        .successHandler(authenticationSuccessHandler)
-//                        .failureHandler(authenticationFailureHandler))
+                .addFilterBefore(loginAttemptFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(loggingFilter, JwtAuthenticationFilter.class)
-//                .requiresChannel(channel -> channel
-//                        .anyRequest().requiresSecure())
-
+                .requiresChannel(channel -> channel
+                        .anyRequest().requiresSecure())
                 .build();
     }
 
